@@ -165,6 +165,7 @@ class _MyAppState extends State<MyApp> {
                   resultText = 'requestPermissions: $result';
                 } catch (e) {
                   resultText = e.toString();
+                  debugPrint(resultText);
                 }
                 _updateResultText();
               },

@@ -127,6 +127,7 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
                     val intent = context?.let { contract.createIntent(it, allPermissions) }
                     activity!!.startActivityForResult(intent, HEALTH_CONNECT_RESULT_CODE)
                 } catch (e: Throwable) {
+                    permissionResult = null
                     result.error("UNABLE_TO_START_ACTIVITY", e.message, e)
                 }
             }
@@ -331,13 +332,11 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
         if (requestCode == HEALTH_CONNECT_RESULT_CODE) {
             val result = permissionResult
             permissionResult = null
-            if (resultCode == Activity.RESULT_OK) {
-                if (data != null && result != null) {
-                    scope.launch {
-                        result.success(true)
-                    }
-                    return true
+            if (result != null && resultCode == Activity.RESULT_OK && data != null) {
+                scope.launch {
+                    result.success(true)
                 }
+                return true
             }
             scope.launch {
                 result?.success(false)
