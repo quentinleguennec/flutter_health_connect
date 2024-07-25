@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_health_connect/flutter_health_connect.dart';
 
 void main() {
@@ -15,6 +16,17 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  /// NOTE: [_checkIfShouldShowPrivacyPolicyChannel] needs to match the CHANNEL name defined in android/app/src/main/kotlin/dev/duynp/flutter_health_connect_example/MainActivity.kt
+  static const String _checkIfShouldShowPrivacyPolicyChannel = 'app.channel.flutter.health.connect.show.privacy.policy';
+
+  /// NOTE: [_checkIfShouldShowPrivacyPolicyFunction] needs to match the FUNCTION name defined in android/app/src/main/kotlin/dev/duynp/flutter_health_connect_example/MainActivity.kt
+  static const String _checkIfShouldShowPrivacyPolicyFunction = 'checkIfShouldShowPrivacyPolicy';
+  static const MethodChannel platform = MethodChannel(_checkIfShouldShowPrivacyPolicyChannel);
+
+  static const String _privacyPolicy = 'You asked to see our privacy policy.\n\n'
+      'I would show it to you, but we both know these are always written in such a way that only lawyers can both read and understand them fully (at the cost of their sanity).\n\n'
+      'Just accept it, and pray we somewhat have your best interest at heart.';
+
   // List<HealthConnectDataType> types = [
   //   HealthConnectDataType.ActiveCaloriesBurned,
   //   HealthConnectDataType.BasalBodyTemperature,
@@ -55,7 +67,7 @@ class _MyAppState extends State<MyApp> {
   //   HealthConnectDataType.WheelchairPushes,
   // ];
 
-  List<HealthConnectDataType> types = [
+  final List<HealthConnectDataType> _types = [
     HealthConnectDataType.Steps,
     HealthConnectDataType.ExerciseSession,
     // HealthConnectDataType.HeartRate,
@@ -64,207 +76,271 @@ class _MyAppState extends State<MyApp> {
     // HealthConnectDataType.RespiratoryRate,
   ];
 
-  bool readOnly = true;
-  String resultText = '';
+  final bool _isReadOnly = true;
 
-  String token = "";
+  String _resultText = '';
+  String _token = '';
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Health Connect'),
-        ),
-        body: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            ElevatedButton(
-              onPressed: () async {
-                var result = await HealthConnectFactory.isApiSupported();
-                resultText = 'isApiSupported: $result';
-                _updateResultText();
-              },
-              child: const Text('isApiSupported'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                var result = await HealthConnectFactory.isAvailable();
-                resultText = 'isAvailable: $result';
-                _updateResultText();
-              },
-              child: const Text('Check installed'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  await HealthConnectFactory.installHealthConnect();
-                  resultText = 'Install activity started';
-                } catch (e) {
-                  resultText = e.toString();
-                }
-                _updateResultText();
-              },
-              child: const Text('Install Health Connect'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  await HealthConnectFactory.openHealthConnectSettings();
-                  resultText = 'Settings activity started';
-                } catch (e) {
-                  resultText = e.toString();
-                }
-                _updateResultText();
-              },
-              child: const Text('Open Health Connect Settings'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                var result = await HealthConnectFactory.hasPermissions(
-                  types,
-                  readOnly: readOnly,
-                );
-                resultText = 'hasPermissions: $result';
-                _updateResultText();
-              },
-              child: const Text('Has Permissions'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  token = await HealthConnectFactory.getChangesToken(types);
-                  resultText = 'token: $token';
-                } catch (e) {
-                  resultText = e.toString();
-                }
-                _updateResultText();
-              },
-              child: const Text('Get Changes Token'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  var result = await HealthConnectFactory.getChanges(token);
-                  resultText = 'token: $result';
-                } catch (e) {
-                  resultText = e.toString();
-                }
-                _updateResultText();
-              },
-              child: const Text('Get Changes'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  var result = await HealthConnectFactory.requestPermissions(
-                    types,
-                    //readOnly: readOnly,
-                  );
-                  resultText = 'requestPermissions: $result';
-                } catch (e) {
-                  resultText = e.toString();
-                  debugPrint(resultText);
-                }
-                _updateResultText();
-              },
-              child: const Text('Request Permissions'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                var startTime =
-                    DateTime.now().subtract(const Duration(days: 4));
-                var endTime = DateTime.now();
-                try {
-                  final requests = <Future>[];
-                  Map<String, dynamic> typePoints = {};
-                  for (var type in types) {
-                    requests.add(HealthConnectFactory.getRecords(
-                      type: type,
-                      startTime: startTime,
-                      endTime: endTime,
-                    ).then((value) => typePoints.addAll({type.name: value})));
-                  }
-                  await Future.wait(requests);
-                  resultText = '$typePoints';
-                } catch (e, s) {
-                  resultText = '$e:$s'.toString();
-                }
-                _updateResultText();
-              },
-              child: const Text('Get Record'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                var startTime =
-                    DateTime.now().subtract(const Duration(seconds: 5));
-                var endTime = DateTime.now();
-                StepsRecord stepsRecord = StepsRecord(
-                  startTime: startTime,
-                  endTime: endTime,
-                  count: 5,
-                );
-                ExerciseSessionRecord exerciseSessionRecord =
-                    ExerciseSessionRecord(
-                  startTime: startTime,
-                  endTime: endTime,
-                  exerciseType: ExerciseType.walking,
-                );
-                try {
-                  final requests = <Future>[];
-                  Map<String, dynamic> typePoints = {};
-                  requests.add(HealthConnectFactory.writeData(
-                    type: HealthConnectDataType.Steps,
-                    data: [stepsRecord],
-                  ).then((value) => typePoints.addAll(
-                      {HealthConnectDataType.Steps.name: stepsRecord})));
+  void initState() {
+    super.initState();
 
-                  requests.add(HealthConnectFactory.writeData(
-                    type: HealthConnectDataType.ExerciseSession,
-                    data: [exerciseSessionRecord],
-                  ).then((value) => typePoints.addAll({
-                        HealthConnectDataType.ExerciseSession.name:
-                            exerciseSessionRecord
-                      })));
-                  await Future.wait(requests);
-                  resultText = '$typePoints';
-                } catch (e, s) {
-                  resultText = '$e:$s'.toString();
-                }
-                _updateResultText();
-              },
-              child: const Text('Send Record'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                var startTime =
-                    DateTime.now().subtract(const Duration(days: 1));
-                var endTime = DateTime.now();
-                try {
-                  var result = await HealthConnectFactory.aggregate(
-                    aggregationKeys: [
-                      StepsRecord.aggregationKeyCountTotal,
-                      ExerciseSessionRecord.aggregationKeyExerciseDurationTotal,
-                    ],
-                    startTime: startTime,
-                    endTime: endTime,
-                  );
-                  resultText = '$result';
-                } catch (e, s) {
-                  resultText = '$e:$s'.toString();
-                }
-                _updateResultText();
-              },
-              child: const Text('Get aggregated data'),
-            ),
-            Text(resultText),
-          ],
-        ),
-      ),
+    /// If your application's android:launchMode is set to "standard" or "singleTop" in your AndroidManifest then initState
+    /// will be called when the user taps the "privacy policy" in Google Health's permission dialog.
+    /// If it is instead set to "singleTask" or "singleInstance" or "singleInstancePerTask" then initState will NOT be called.
+    /// See [_onRequestPermissionsButtonTap] for more info.
+    _checkIfShouldShowPrivacyPolicy().then(
+      (shouldShowPrivacyPolicy) {
+        if (shouldShowPrivacyPolicy) {
+          _updateResultText(_privacyPolicy);
+        }
+      },
     );
   }
 
-  void _updateResultText() {
-    setState(() {});
+  Future<bool> _checkIfShouldShowPrivacyPolicy() async =>
+      await platform.invokeMethod(_checkIfShouldShowPrivacyPolicyFunction) as bool;
+
+  void _updateResultText(String newText) {
+    if (context.mounted) {
+      setState(() => _resultText = newText);
+    }
   }
+
+  void _onIsApiSupportedButtonTap() async {
+    try {
+      final bool isApiSupported = await HealthConnectFactory.isApiSupported();
+      _updateResultText('isApiSupported: $isApiSupported');
+    } catch (e) {
+      debugPrint(e.toString());
+      _updateResultText(e.toString());
+    }
+  }
+
+  void _onIsAvailableButtonTap() async {
+    try {
+      final bool isAvailable = await HealthConnectFactory.isAvailable();
+      _updateResultText('isAvailable: $isAvailable');
+    } catch (e) {
+      debugPrint(e.toString());
+      _updateResultText(e.toString());
+    }
+  }
+
+  void _onInstallHealthConnectButtonTap() async {
+    try {
+      await HealthConnectFactory.installHealthConnect();
+      _updateResultText('Install activity started');
+    } catch (e) {
+      debugPrint(e.toString());
+      _updateResultText(e.toString());
+    }
+  }
+
+  void _onOpenHealthConnectSettingsButtonTap() async {
+    try {
+      await HealthConnectFactory.openHealthConnectSettings();
+      _updateResultText('Settings activity started');
+    } catch (e) {
+      debugPrint(e.toString());
+      _updateResultText(e.toString());
+    }
+  }
+
+  void _onCheckHasPermissionButtonTap() async {
+    try {
+      final bool hasPermissions = await HealthConnectFactory.hasPermissions(
+        _types,
+        readOnly: _isReadOnly,
+      );
+      _updateResultText('hasPermissions: $hasPermissions');
+    } catch (e) {
+      debugPrint(e.toString());
+      _updateResultText(e.toString());
+    }
+  }
+
+  void _onGetChangesTokenButtonTap() async {
+    try {
+      _token = await HealthConnectFactory.getChangesToken(_types);
+      _updateResultText('Changes token: $_token');
+    } catch (e) {
+      debugPrint(e.toString());
+      _updateResultText(e.toString());
+    }
+  }
+
+  void _onGetChangesButtonTap() async {
+    try {
+      if(_token.isEmpty) {
+        _updateResultText('Changes: Before getting the changes you need to generate the changes token.');
+        return;
+      }
+
+      final Map<String, dynamic> changes = await HealthConnectFactory.getChanges(_token);
+      _updateResultText('Changes: $changes');
+    } catch (e) {
+      debugPrint(e.toString());
+      _updateResultText(e.toString());
+    }
+  }
+
+  void _onRequestPermissionsButtonTap() async {
+    try {
+      final bool hasPermissions = await HealthConnectFactory.requestPermissions(
+        _types,
+        readOnly: _isReadOnly,
+      );
+
+      /// If your application's android:launchMode is set to "singleTask" or "singleInstance" or
+      /// "singleInstancePerTask" in your AndroidManifest then the app will continue executing the code
+      /// from here when the user taps the "privacy policy" button in Google Health's permission dialog.
+      /// If it is instead set to "standard" or "singleTop" then the code under will NOT be called, and initState
+      /// will be called instead.
+      final bool shouldShowPrivacyPolicy = await _checkIfShouldShowPrivacyPolicy();
+      if (shouldShowPrivacyPolicy) {
+        _updateResultText(_privacyPolicy);
+      } else {
+        _updateResultText('Has permissions: $hasPermissions');
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+      _updateResultText(e.toString());
+    }
+  }
+
+  void _onGetRecordsButtonTap() async {
+    try {
+      final DateTime startTime = DateTime.now().subtract(const Duration(days: 4));
+      final DateTime endTime = DateTime.now();
+      final List<Future> requests = <Future>[];
+      final Map<String, dynamic> typePoints = {};
+      for (var type in _types) {
+        requests.add(HealthConnectFactory.getRecords(
+          type: type,
+          startTime: startTime,
+          endTime: endTime,
+        ).then((value) => typePoints.addAll({type.name: value})));
+      }
+      await Future.wait(requests);
+      _updateResultText('$typePoints');
+    } catch (e) {
+      debugPrint(e.toString());
+      _updateResultText(e.toString());
+    }
+  }
+
+  void _onSendRecordsButtonTap() async {
+    try {
+      final DateTime startTime = DateTime.now().subtract(const Duration(seconds: 5));
+      final DateTime endTime = DateTime.now();
+      final StepsRecord stepsRecord = StepsRecord(
+        startTime: startTime,
+        endTime: endTime,
+        count: 5,
+      );
+      final ExerciseSessionRecord exerciseSessionRecord = ExerciseSessionRecord(
+        startTime: startTime,
+        endTime: endTime,
+        exerciseType: ExerciseType.walking,
+      );
+      final List<Future> requests = <Future>[];
+      final Map<String, dynamic> typePoints = {};
+
+      requests.add(HealthConnectFactory.writeData(
+        type: HealthConnectDataType.Steps,
+        data: [stepsRecord],
+      ).then((value) => typePoints.addAll({HealthConnectDataType.Steps.name: stepsRecord})));
+
+      requests.add(HealthConnectFactory.writeData(
+        type: HealthConnectDataType.ExerciseSession,
+        data: [exerciseSessionRecord],
+      ).then((value) => typePoints.addAll({HealthConnectDataType.ExerciseSession.name: exerciseSessionRecord})));
+
+      await Future.wait(requests);
+
+      _resultText = '$typePoints';
+    } catch (e) {
+      debugPrint(e.toString());
+      _updateResultText(e.toString());
+    }
+  }
+
+  void _onGetAggregatedDataButtonTap() async {
+    try {
+      final DateTime startTime = DateTime.now().subtract(const Duration(days: 1));
+      final DateTime endTime = DateTime.now();
+      final Map<String, double> result = await HealthConnectFactory.aggregate(
+        aggregationKeys: [
+          StepsRecord.aggregationKeyCountTotal,
+          ExerciseSessionRecord.aggregationKeyExerciseDurationTotal,
+        ],
+        startTime: startTime,
+        endTime: endTime,
+      );
+      _updateResultText('$result');
+    } catch (e) {
+      debugPrint(e.toString());
+      _updateResultText(e.toString());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Health Connect'),
+          ),
+          body: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              ElevatedButton(
+                onPressed: () => _onIsApiSupportedButtonTap(),
+                child: const Text('Check if Api is supported'),
+              ),
+              ElevatedButton(
+                onPressed: () => _onIsAvailableButtonTap(),
+                child: const Text('Check if Google Health Connect app is installed'),
+              ),
+              ElevatedButton(
+                onPressed: () => _onInstallHealthConnectButtonTap(),
+                child: const Text('Install Health Connect'),
+              ),
+              ElevatedButton(
+                onPressed: () => _onOpenHealthConnectSettingsButtonTap(),
+                child: const Text('Open Health Connect Settings'),
+              ),
+              ElevatedButton(
+                onPressed: () async => _onCheckHasPermissionButtonTap(),
+                child: const Text('Check if permissions are granted'),
+              ),
+              ElevatedButton(
+                onPressed: () => _onGetChangesTokenButtonTap(),
+                child: const Text('Get Changes Token'),
+              ),
+              ElevatedButton(
+                onPressed: () => _onGetChangesButtonTap(),
+                child: const Text('Get Changes'),
+              ),
+              ElevatedButton(
+                onPressed: () => _onRequestPermissionsButtonTap(),
+                child: const Text('Request Permissions'),
+              ),
+              ElevatedButton(
+                onPressed: () => _onGetRecordsButtonTap(),
+                child: const Text('Get Records'),
+              ),
+              ElevatedButton(
+                onPressed: () => _onSendRecordsButtonTap(),
+                child: const Text('Send Records'),
+              ),
+              ElevatedButton(
+                onPressed: () => _onGetAggregatedDataButtonTap(),
+                child: const Text('Get aggregated data'),
+              ),
+              Text(_resultText),
+            ],
+          ),
+        ),
+      );
 }

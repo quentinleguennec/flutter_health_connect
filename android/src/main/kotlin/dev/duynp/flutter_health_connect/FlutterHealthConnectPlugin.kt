@@ -51,7 +51,7 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
         context = flutterPluginBinding.applicationContext
         client = HealthConnectClient.getOrCreate(context!!)
         replyMapper.registerModule(JavaTimeModule())
-        replyMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        replyMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -73,7 +73,7 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
             (activity as ComponentActivity).registerForActivityResult(
                 requestPermissionActivityContract
             ) { granted ->
-                onHealthConnectPermissionCallback(granted);
+                onHealthConnectPermissionCallback(granted)
             }
     }
 
@@ -90,7 +90,7 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
             return
         }
         activity = null
-        healthConnectRequestPermissionsLauncher = null;
+        healthConnectRequestPermissionsLauncher = null
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -136,7 +136,7 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
                         requestedTypes,
                         isReadOnly
                     )
-                    healthConnectRequestPermissionsLauncher!!.launch(allPermissions);
+                    healthConnectRequestPermissionsLauncher!!.launch(allPermissions)
                 } catch (e: Throwable) {
                     permissionResult = null
                     result.error("UNABLE_TO_START_ACTIVITY", e.message, e)
@@ -360,9 +360,9 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
 
     private fun onHealthConnectPermissionCallback(permissionGranted: Set<String>) {
         if (permissionGranted.isEmpty()) {
-            permissionResult?.success(false);
+            permissionResult?.success(false)
         } else {
-            permissionResult?.success(true);
+            permissionResult?.success(true)
         }
 
     }
