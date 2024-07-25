@@ -46,7 +46,6 @@ class _MyAppState extends State<MyApp> {
   //   HealthConnectDataType.RestingHeartRate,
   //   HealthConnectDataType.SexualActivity,
   //   HealthConnectDataType.SleepSession,
-  //   HealthConnectDataType.SleepStage,
   //   HealthConnectDataType.Speed,
   //   HealthConnectDataType.StepsCadence,
   //   HealthConnectDataType.Steps,
