@@ -33,7 +33,6 @@ import kotlinx.coroutines.*
 import java.time.*
 import java.time.temporal.ChronoUnit
 
-/** FlutterHealthConnectPlugin */
 class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : FlutterPlugin,
     MethodCallHandler, ActivityAware,
     PluginRegistry.ActivityResultListener {
@@ -209,7 +208,7 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
                     val type = call.argument<String>("type") ?: ""
                     val startTime = call.argument<String>("startTime")
                     val endTime = call.argument<String>("endTime")
-                    val pageSize = call.argument<Int>("pageSize") ?: MAX_LENGTH
+                    val pageSize = call.argument<Int>("pageSize") ?: PAGE_SIZE_MAX_LENGTH
                     val pageToken = call.argument<String?>("pageToken")
                     val ascendingOrder = call.argument<Boolean?>("ascendingOrder") ?: true
                     try {
@@ -245,7 +244,7 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
                     val type = call.argument<String>("type") ?: ""
                     val startTime = call.argument<String>("startTime")
                     val endTime = call.argument<String>("endTime")
-                    val pageSize = call.argument<Int>("pageSize") ?: MAX_LENGTH
+                    val pageSize = call.argument<Int>("pageSize") ?: PAGE_SIZE_MAX_LENGTH
                     val pageToken = call.argument<String?>("pageToken")
                     val ascendingOrder = call.argument<Boolean?>("ascendingOrder") ?: true
                     val records = mutableListOf<Map<String, Any?>>()

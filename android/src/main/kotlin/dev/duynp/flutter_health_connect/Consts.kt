@@ -84,7 +84,8 @@ val HealthConnectRecordTypeMap = hashMapOf(
     WHEELCHAIR_PUSHES to WheelchairPushesRecord::class,
 )
 const val HEALTH_CONNECT_RESULT_CODE = 16969
-const val MAX_LENGTH = 9999999
+/// NOTE: As of July 25th 2024 the max page sized allowed by Google is 5000.
+const val PAGE_SIZE_MAX_LENGTH = 5000
 
 fun mapTypesToPermissions(
     types: List<String>?,

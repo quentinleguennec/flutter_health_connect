@@ -15,6 +15,9 @@ Flutter plugin for Google Health Connect integration. Health Connect gives you a
 ## How to install
 
 ### Android
+
+**For all the following steps you can look at the example app code for reference.**
+
 Add the following line to the end of your "android/gradle.properties" file:
 ```android.jetifier.ignorelist = jackson-core, jackson-databind, jackson-datatype-jsr310, fastdoubleparser```
 
@@ -24,6 +27,32 @@ To interact with Health Connect within the app, declare the Health Connect packa
 <queries>
     <package android:name="com.google.android.apps.healthdata" />
 </queries>
+```
+
+Inside your MainActivity declaration add a reference to `health_permissions` and an intent filter for the Health Connect permissions action
+```
+<activity android:name=".MainActivity">
+    <meta-data android:name="health_permissions" android:resource="@array/health_permissions" />
+
+    <intent-filter>
+        <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+    </intent-filter>
+</activity>
+```
+
+In the Health Connect permissions activity there is a link to your privacy policy. You need to grant the Health Connect app access in order to link back to your privacy policy. In the example below, you should either replace `.MainActivity` with an activity that presents the privacy policy or have the Main Activity route the user to the policy. This step may be required to pass Google app review when requesting access to sensitive permissions.
+
+```xml
+<activity-alias
+     android:name="ViewPermissionUsageActivity"
+     android:exported="true"
+     android:targetActivity=".MainActivity"
+     android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
+        <intent-filter>
+            <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+            <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+        </intent-filter>
+</activity-alias>
 ```
 
 Every data type your app reads or writes needs to be declared using a permission in your manifest. For the full list of permissions and their corresponding data types, see [List of data types](https://developer.android.com/guide/health-and-fitness/health-connect/data-and-data-types/data-types).
@@ -100,16 +129,6 @@ To create the declaration, add to regular permissions any of.
 <uses-permission android:name="android.permission.health.WRITE_WEIGHT"/>
 <uses-permission android:name="android.permission.health.READ_WHEELCHAIR_PUSHES"/>
 <uses-permission android:name="android.permission.health.WRITE_WHEELCHAIR_PUSHES"/>
-```
-Inside your MainActivity declaration add a reference to `health_permissions` and an intent filter for the Health Connect permissions action
-```
-<activity android:name=".MainActivity">
-    <meta-data android:name="health_permissions" android:resource="@array/health_permissions" />
-
-    <intent-filter>
-        <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
-    </intent-filter>
-</activity>
 ```
 
 Health connect developer toolbox: http://goo.gle/health-connect-toolbox

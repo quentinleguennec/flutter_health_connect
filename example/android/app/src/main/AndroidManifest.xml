@@ -1,5 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="dev.duynp.flutter_health_connect_example">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!--    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />-->
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
