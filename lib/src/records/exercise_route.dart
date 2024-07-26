@@ -6,7 +6,7 @@ class ExerciseRoute {
   ExerciseRoute({
     required this.route,
   }) {
-    List<Location> sortedRoute = route
+    final List<Location> sortedRoute = route
       ..sort((a, b) => a.time.compareTo(b.time));
     for (int i = 0; i < sortedRoute.length - 1; i++) {
       assert(sortedRoute[i].time.isBefore(sortedRoute[i + 1].time));

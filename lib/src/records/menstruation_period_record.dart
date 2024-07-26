@@ -21,9 +21,9 @@ class MenstruationPeriodRecord extends IntervalRecord {
     this.startZoneOffset,
   })  : metadata = metadata ?? Metadata.empty(),
         assert(startTime.isBefore(endTime),
-            "startTime must not be after endTime."),
+            'startTime must not be after endTime.'),
         assert(endTime.difference(startTime) <= maxDuration,
-            "Period must not exceed 31 days.");
+            'Period must not exceed 31 days.');
 
   @override
   bool operator ==(Object other) =>

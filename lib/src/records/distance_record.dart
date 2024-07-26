@@ -28,7 +28,7 @@ class DistanceRecord extends IntervalRecord {
     required this.distance,
   })  : metadata = metadata ?? Metadata.empty(),
         assert(startTime.isBefore(endTime),
-            "startTime must not be after endTime."),
+            'startTime must not be after endTime.'),
         assert(distance.inMeters >= _minDistance.inMeters &&
             distance.inMeters <= _maxDistance.inMeters);
 

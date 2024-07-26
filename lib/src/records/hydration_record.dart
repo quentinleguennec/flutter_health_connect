@@ -27,7 +27,7 @@ class HydrationRecord extends IntervalRecord {
     required this.volume,
   })  : metadata = metadata ?? Metadata.empty(),
         assert(startTime.isBefore(endTime),
-            "startTime must not be after endTime."),
+            'startTime must not be after endTime.'),
         assert(volume.inLiters >= _minVolume.inLiters &&
             volume.inLiters <= _maxVolume.inLiters);
 

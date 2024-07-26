@@ -29,7 +29,7 @@ class TotalCaloriesBurnedRecord extends IntervalRecord {
     metadata,
   })  : metadata = metadata ?? Metadata.empty(),
         assert(startTime.isBefore(endTime),
-            "startTime must not be after endTime."),
+            'startTime must not be after endTime.'),
         assert(energy.inKilocalories >=
                 _minTotalCaloriesBurned.inKilocalories &&
             energy.inKilocalories <= _maxTotalCaloriesBurned.inKilocalories);

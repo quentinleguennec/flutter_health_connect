@@ -34,7 +34,7 @@ class StepsCadenceRecord extends SeriesRecord<StepsCadenceSample> {
     metadata,
   })  : metadata = metadata ?? Metadata.empty(),
         assert(startTime.isBefore(endTime),
-            "startTime must not be after endTime.");
+            'startTime must not be after endTime.');
 
   @override
   bool operator ==(Object other) =>

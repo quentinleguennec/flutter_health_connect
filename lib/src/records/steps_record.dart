@@ -27,7 +27,7 @@ class StepsRecord extends IntervalRecord {
     required this.count,
   })  : metadata = metadata ?? Metadata.empty(),
         assert(startTime.isBefore(endTime),
-            "startTime must not be after endTime."),
+            'startTime must not be after endTime.'),
         assert(count >= _minSteps && count <= _maxSteps);
 
   @override

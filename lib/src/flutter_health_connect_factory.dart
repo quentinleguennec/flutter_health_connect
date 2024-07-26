@@ -11,8 +11,8 @@ class HealthConnectFactory {
     return await _channel.invokeMethod('isAvailable');
   }
 
-  static installHealthConnect() async {
-    _channel.invokeMethod('installHealthConnect');
+  static Future<void> installHealthConnect() async {
+    return await _channel.invokeMethod('installHealthConnect');
   }
 
   static Future<bool> hasPermissions(
@@ -90,9 +90,9 @@ class HealthConnectFactory {
       'pageToken': pageToken,
       'ascendingOrder': ascendingOrder,
     };
-    List<dynamic>? data = await _channel.invokeMethod('getRecords', args);
+    final List<dynamic>? data = await _channel.invokeMethod('getRecords', args);
     if (data != null && data.isNotEmpty) {
-      List<dynamic> records = data
+      final List<dynamic> records = data
           .map((e) => mapToRecord(type, Map<String, dynamic>.from(e)))
           .toList();
       return records;

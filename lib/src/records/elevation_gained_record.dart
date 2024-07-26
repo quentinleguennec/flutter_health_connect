@@ -28,7 +28,7 @@ class ElevationGainedRecord extends IntervalRecord {
     required this.elevation,
   })  : metadata = metadata ?? Metadata.empty(),
         assert(startTime.isBefore(endTime),
-            "startTime must not be after endTime."),
+            'startTime must not be after endTime.'),
         assert(elevation.inMeters >= _minElevation.inMeters &&
             elevation.inMeters <= _maxElevation.inMeters);
 
