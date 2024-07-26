@@ -172,7 +172,7 @@ class _MyAppState extends State<MyApp> {
 
   void _onGetChangesButtonTap() async {
     try {
-      if(_token.isEmpty) {
+      if (_token.isEmpty) {
         _updateResultText('Changes: Before getting the changes you need to generate the changes token.');
         return;
       }
@@ -213,14 +213,18 @@ class _MyAppState extends State<MyApp> {
     try {
       final DateTime startTime = DateTime.now().subtract(const Duration(days: 4));
       final DateTime endTime = DateTime.now();
-      final List<Future> requests = <Future>[];
+      final List<Future<dynamic>> requests = [];
       final Map<String, dynamic> typePoints = {};
-      for (var type in _types) {
-        requests.add(HealthConnectFactory.getRecords(
-          type: type,
-          startTime: startTime,
-          endTime: endTime,
-        ).then((value) => typePoints.addAll({type.name: value})));
+      for (final HealthConnectDataType type in _types) {
+        requests.add(
+          HealthConnectFactory.getRecords(
+            type: type,
+            startTime: startTime,
+            endTime: endTime,
+          ).then(
+            (value) => typePoints.addAll({type.name: value}),
+          ),
+        );
       }
       await Future.wait(requests);
       _updateResultText('$typePoints');
@@ -244,7 +248,7 @@ class _MyAppState extends State<MyApp> {
         endTime: endTime,
         exerciseType: ExerciseType.walking,
       );
-      final List<Future> requests = <Future>[];
+      final List<Future<dynamic>> requests = [];
       final Map<String, dynamic> typePoints = {};
 
       requests.add(HealthConnectFactory.writeData(
