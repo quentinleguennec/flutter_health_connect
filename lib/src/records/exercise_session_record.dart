@@ -120,13 +120,9 @@ class ExerciseSessionRecord extends IntervalRecord {
   factory ExerciseSessionRecord.fromMap(Map<String, dynamic> map) {
     return ExerciseSessionRecord(
       startTime: DateTime.parse(map['startTime']),
-      startZoneOffset: map['startZoneOffset'] != null
-          ? Duration(hours: map['startZoneOffset'] as int)
-          : null,
+      startZoneOffset: _parseZoneOffset(map['startZoneOffset']),
       endTime: DateTime.parse(map['endTime']),
-      endZoneOffset: map['endZoneOffset'] != null
-          ? Duration(hours: map['endZoneOffset'] as int)
-          : null,
+      endZoneOffset: _parseZoneOffset(map['endZoneOffset']),
       metadata: Metadata.fromMap(Map<String, dynamic>.from(map['metadata'])),
       exerciseType: ExerciseType.fromValue(map['exerciseType']),
       title: map['title'],
@@ -135,8 +131,27 @@ class ExerciseSessionRecord extends IntervalRecord {
           map['segments']?.map((x) => ExerciseSegment.fromMap(x))),
       laps: List<ExerciseLap>.from(
           map['laps']?.map((x) => ExerciseLap.fromMap(x))),
-      route: map['route'] != null ? ExerciseRoute.fromMap(map['route']) : null,
+      route: map['route'] != null
+          ? ExerciseRoute.fromMap(Map<String, dynamic>.from(map['route']))
+          : null,
     );
+  }
+
+  static Duration? _parseZoneOffset(dynamic zoneOffset) {
+    if (zoneOffset == null) {
+      return null;
+    }
+    if (zoneOffset is int) {
+      return Duration(hours: zoneOffset);
+    } else if (zoneOffset is String) {
+      final zoneOffsetHours = int.tryParse(
+          zoneOffset.split(':').first.replaceAll('+', '').replaceAll('-', ''));
+      if (zoneOffsetHours == null) {
+        return null;
+      }
+      return Duration(hours: zoneOffsetHours);
+    }
+    return null;
   }
 
   @override

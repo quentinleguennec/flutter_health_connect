@@ -9,6 +9,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.changes.UpsertionChange
+import androidx.health.connect.client.contracts.ExerciseRouteRequestContract
 import androidx.health.connect.client.records.*
 import androidx.health.connect.client.records.metadata.DataOrigin
 import androidx.health.connect.client.records.metadata.Device
@@ -38,11 +39,14 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
     PluginRegistry.ActivityResultListener {
     private var replyMapper: ObjectMapper = ObjectMapper()
     private var permissionResult: Result? = null
+    private var exerciseRouteResult: Result? = null
+    private var exerciseRecordResult: MutableMap<String, Any?>? = null
     private lateinit var client: HealthConnectClient
     private var activity: Activity? = null
     private var context: Context? = null
     private lateinit var scope: CoroutineScope
     private var healthConnectRequestPermissionsLauncher: ActivityResultLauncher<Set<String>>? = null
+    private var requestExerciseRouteLauncher: ActivityResultLauncher<String>? = null
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -58,6 +62,8 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
         scope.cancel()
         channel = null
         activity = null
+        exerciseRecordResult = null
+        exerciseRouteResult = null
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
@@ -75,6 +81,12 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
             ) { granted ->
                 onHealthConnectPermissionCallback(granted)
             }
+        requestExerciseRouteLauncher =
+            (activity as ComponentActivity).registerForActivityResult(
+                ExerciseRouteRequestContract()
+            ) { exerciseRoute: ExerciseRoute? ->
+                onExerciseRoutePermissionCallback(exerciseRoute)
+            }
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
@@ -91,6 +103,9 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
         }
         activity = null
         healthConnectRequestPermissionsLauncher = null
+        requestExerciseRouteLauncher = null
+        exerciseRecordResult = null
+        exerciseRouteResult = null
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -279,6 +294,52 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
                 }
             }
 
+            "getRecordById" -> {
+                scope.launch {
+                    val type = call.argument<String>("type") ?: ""
+                    val recordId = call.argument<String>("id") ?: ""
+                    val recordResult = mutableMapOf<String, Any?>()
+                    try {
+                        HealthConnectRecordTypeMap[type]?.let { classType ->
+                            val reply = client.readRecord(classType, recordId)
+                            val record = reply.record
+                            recordResult.putAll(
+                                replyMapper.convertValue(
+                                    record,
+                                    hashMapOf<String, Any?>()::class.java
+                                )
+                            )
+                            if (record is ExerciseSessionRecord) {
+                                when (val exerciseRouteResultValue =
+                                    record.exerciseRouteResult) {
+                                    is ExerciseRouteResult.Data -> {
+                                        recordResult["route"] = replyMapper.convertValue(
+                                            exerciseRouteResultValue.exerciseRoute,
+                                            hashMapOf<String, Any?>()::class.java
+                                        )
+                                        result.success(recordResult)
+                                    }
+
+                                    is ExerciseRouteResult.ConsentRequired -> {
+                                        exerciseRouteResult = result
+                                        exerciseRecordResult = recordResult
+                                        requestExerciseRouteLauncher?.launch(recordId)
+                                    }
+
+                                    is ExerciseRouteResult.NoData -> result.success(recordResult)
+                                    else -> result.success(recordResult)
+                                }
+
+                            } else {
+                                result.success(recordResult)
+                            }
+                        } ?: throw Throwable("Unsupported type $type")
+                    } catch (e: Throwable) {
+                        result.error("GET_RECORDS_FAIL", e.localizedMessage, e)
+                    }
+                }
+            }
+
             "writeData" -> writeData(call, result)
 
             "openHealthConnectSettings" -> {
@@ -365,6 +426,22 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
             permissionResult?.success(true)
         }
 
+    }
+
+    private fun onExerciseRoutePermissionCallback(exerciseRoute: ExerciseRoute?) {
+        if (exerciseRoute != null) {
+            exerciseRecordResult?.put(
+                "route", replyMapper.convertValue(
+                    exerciseRoute,
+                    hashMapOf<String, Any?>()::class.java
+                )
+            )
+            exerciseRouteResult?.success(exerciseRecordResult)
+        } else {
+            exerciseRouteResult?.success(exerciseRecordResult)
+        }
+        exerciseRecordResult = null
+        exerciseRouteResult = null
     }
 
     private fun writeData(call: MethodCall, result: Result) {
