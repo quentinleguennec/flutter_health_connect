@@ -143,7 +143,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   /// NOTE: [_checkIfShouldShowPrivacyPolicyChannel] needs to match the CHANNEL name defined in Step 1.
   static const String _checkIfShouldShowPrivacyPolicyChannel = 'app.channel.flutter.health.connect.show.privacy.policy';
-   /// NOTE: [_checkIfShouldShowPrivacyPolicyFunction] needs to match the FUNCTION name defined in android/app/src/main/kotlin/dev/duynp/flutter_health_connect_example/MainActivity.kt
+   /// NOTE: [_checkIfShouldShowPrivacyPolicyFunction] needs to match the FUNCTION name defined in Step 1.
   static const String _checkIfShouldShowPrivacyPolicyFunction = 'checkIfShouldShowPrivacyPolicy';
   static const MethodChannel platform = MethodChannel(_checkIfShouldShowPrivacyPolicyChannel);
 
@@ -191,7 +191,7 @@ class _MyAppState extends State<MyApp> {
 
 Every data type your app reads or writes needs to be declared using a permission in your manifest. For the full list of permissions and their corresponding data types, see [List of data types](https://developer.android.com/guide/health-and-fitness/health-connect/data-and-data-types/data-types).
 
-To create the declaration, add to regular permissions any of.
+To create the declaration, add to regular permissions any of:
 ```xml
 <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED"/>
 <uses-permission android:name="android.permission.health.WRITE_ACTIVE_CALORIES_BURNED"/>

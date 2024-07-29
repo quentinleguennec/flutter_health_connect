@@ -11,3 +11,4 @@ export 'src/units.dart';
 
 part 'src/data_types.dart';
 part 'src/flutter_health_connect_factory.dart';
+part 'src/flutter_health_connect_exception.dart';
