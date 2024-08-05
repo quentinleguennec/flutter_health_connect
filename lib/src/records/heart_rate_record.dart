@@ -1,5 +1,6 @@
 import 'package:flutter_health_connect/src/records/metadata/metadata.dart';
 import 'package:flutter_health_connect/src/records/series_record.dart';
+import 'package:flutter_health_connect/src/utils/datetime_utils.dart';
 
 class HeartRateRecord extends SeriesRecord<HeartRateSample> {
   /// Unit: Beats per minute (BPM)
@@ -75,17 +76,13 @@ class HeartRateRecord extends SeriesRecord<HeartRateSample> {
   factory HeartRateRecord.fromMap(Map<String, dynamic> map) {
     return HeartRateRecord(
       endTime: DateTime.parse(map['endTime']),
-      endZoneOffset: map['endZoneOffset'] == null
-          ? null
-          : Duration(hours: map['endZoneOffset'] as int),
+      endZoneOffset: DateTimeUtils.parseDuration(map['endZoneOffset']),
       metadata: Metadata.fromMap(Map<String, dynamic>.from(map['metadata'])),
       samples: (map['samples'] as List<dynamic>)
           .map((e) => HeartRateSample.fromMap(e as Map<String, dynamic>))
           .toList(),
       startTime: DateTime.parse(map['startTime']),
-      startZoneOffset: map['startZoneOffset'] == null
-          ? null
-          : Duration(hours: map['startZoneOffset'] as int),
+      startZoneOffset: DateTimeUtils.parseDuration(map['startZoneOffset']),
     );
   }
 

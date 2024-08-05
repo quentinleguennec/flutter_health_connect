@@ -1,6 +1,7 @@
 import 'package:flutter_health_connect/src/records/instantaneous_record.dart';
 import 'package:flutter_health_connect/src/records/metadata/metadata.dart';
 import 'package:flutter_health_connect/src/units/pressure.dart';
+import 'package:flutter_health_connect/src/utils/datetime_utils.dart';
 
 class BloodPressureRecord extends InstantaneousRecord {
   /// Unit: millimeters of mercury
@@ -102,9 +103,7 @@ class BloodPressureRecord extends InstantaneousRecord {
     return BloodPressureRecord(
       metadata: Metadata.fromMap(Map<String, dynamic>.from(map['metadata'])),
       time: DateTime.parse(map['time']),
-      zoneOffset: map['zoneOffset'] != null
-          ? Duration(hours: map['zoneOffset'] as int)
-          : null,
+      zoneOffset: DateTimeUtils.parseDuration(map['zoneOffset']),
       systolic: Pressure.fromMap(Map<String, dynamic>.from(map['systolic'])),
       diastolic: Pressure.fromMap(Map<String, dynamic>.from(map['diastolic'])),
       measurementLocation: (map['measurementLocation'] != null &&

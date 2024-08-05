@@ -1,4 +1,5 @@
 import 'package:flutter_health_connect/src/records/interval_record.dart';
+import 'package:flutter_health_connect/src/utils/datetime_utils.dart';
 
 import 'exercise_lap.dart';
 import 'exercise_route.dart';
@@ -120,9 +121,9 @@ class ExerciseSessionRecord extends IntervalRecord {
   factory ExerciseSessionRecord.fromMap(Map<String, dynamic> map) {
     return ExerciseSessionRecord(
       startTime: DateTime.parse(map['startTime']),
-      startZoneOffset: _parseZoneOffset(map['startZoneOffset']),
+      startZoneOffset: DateTimeUtils.parseDuration(map['startZoneOffset']),
       endTime: DateTime.parse(map['endTime']),
-      endZoneOffset: _parseZoneOffset(map['endZoneOffset']),
+      endZoneOffset: DateTimeUtils.parseDuration(map['endZoneOffset']),
       metadata: Metadata.fromMap(Map<String, dynamic>.from(map['metadata'])),
       exerciseType: ExerciseType.fromValue(map['exerciseType']),
       title: map['title'],
@@ -135,23 +136,6 @@ class ExerciseSessionRecord extends IntervalRecord {
           ? ExerciseRoute.fromMap(Map<String, dynamic>.from(map['route']))
           : null,
     );
-  }
-
-  static Duration? _parseZoneOffset(dynamic zoneOffset) {
-    if (zoneOffset == null) {
-      return null;
-    }
-    if (zoneOffset is int) {
-      return Duration(hours: zoneOffset);
-    } else if (zoneOffset is String) {
-      final zoneOffsetHours = int.tryParse(
-          zoneOffset.split(':').first.replaceAll('+', '').replaceAll('-', ''));
-      if (zoneOffsetHours == null) {
-        return null;
-      }
-      return Duration(hours: zoneOffsetHours);
-    }
-    return null;
   }
 
   @override

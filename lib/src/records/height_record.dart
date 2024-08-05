@@ -1,6 +1,7 @@
 import 'package:flutter_health_connect/src/records/instantaneous_record.dart';
 import 'package:flutter_health_connect/src/records/metadata/metadata.dart';
 import 'package:flutter_health_connect/src/units/length.dart';
+import 'package:flutter_health_connect/src/utils/datetime_utils.dart';
 
 class HeightRecord extends InstantaneousRecord {
   /// Unit: meters
@@ -57,9 +58,7 @@ class HeightRecord extends InstantaneousRecord {
   factory HeightRecord.fromMap(Map<String, dynamic> map) {
     return HeightRecord(
       time: DateTime.parse(map['time']),
-      zoneOffset: map['zoneOffset'] != null
-          ? Duration(hours: map['zoneOffset'] as int)
-          : null,
+      zoneOffset: DateTimeUtils.parseDuration(map['zoneOffset']),
       metadata: Metadata.fromMap(Map<String, dynamic>.from(map['metadata'])),
       height: Length.fromMap(Map<String, dynamic>.from(map['height'])),
     );
