@@ -37,8 +37,10 @@ class HeartRateRecord extends SeriesRecord<HeartRateSample> {
     required this.startTime,
     this.startZoneOffset,
   })  : metadata = metadata ?? Metadata.empty(),
-        assert(startTime.isBefore(endTime),
-            'startTime must not be after endTime.');
+        assert(
+          startTime.isBefore(endTime) || startTime.isAtSameMomentAs(endTime),
+          'startTime must not be after endTime.',
+        );
 
   @override
   bool operator ==(Object other) =>
@@ -79,7 +81,7 @@ class HeartRateRecord extends SeriesRecord<HeartRateSample> {
       endZoneOffset: DateTimeUtils.parseDuration(map['endZoneOffset']),
       metadata: Metadata.fromMap(Map<String, dynamic>.from(map['metadata'])),
       samples: (map['samples'] as List<dynamic>)
-          .map((e) => HeartRateSample.fromMap(e as Map<String, dynamic>))
+          .map((e) => HeartRateSample.fromMap(e as Map<dynamic, dynamic>))
           .toList(),
       startTime: DateTime.parse(map['startTime']),
       startZoneOffset: DateTimeUtils.parseDuration(map['startZoneOffset']),
@@ -122,10 +124,17 @@ class HeartRateSample {
     };
   }
 
-  factory HeartRateSample.fromMap(Map<String, dynamic> map) {
+  factory HeartRateSample.fromMap(Map<dynamic, dynamic> map) {
+    // Convert map keys to strings if they are not already
+    final Map<String, dynamic> stringKeyMap = Map<String, dynamic>.fromEntries(
+      map.entries.map(
+        (e) => MapEntry(e.key.toString(), e.value),
+      ),
+    );
+
     return HeartRateSample(
-      beatsPerMinute: map['beatsPerMinute'] as int,
-      time: DateTime.parse(map['time']),
+      beatsPerMinute: stringKeyMap['beatsPerMinute'] as int,
+      time: DateTime.parse(stringKeyMap['time']),
     );
   }
 }
