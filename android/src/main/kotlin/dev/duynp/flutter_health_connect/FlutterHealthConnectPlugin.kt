@@ -667,8 +667,10 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
                         result.success(recordResult)
                     }
                 } ?: throw Throwable("Unsupported type $type")
+            } catch (e: SecurityException) {
+                result.error(ERROR_MISSING_PERMISSIONS, e.message, e)
             } catch (e: Throwable) {
-                result.error("GET_RECORDS_FAIL", e.localizedMessage, e)
+                result.error(ERROR_UNKNOWN, e.message, e)
             }
         }
     }
