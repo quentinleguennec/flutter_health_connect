@@ -615,6 +615,19 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
     }
 
     private fun getRecordById(call: MethodCall, result: Result) {
+        if (!checkIfApiReady()) {
+            result.error(
+                ERROR_NOT_AVAILABLE,
+                "The API is not supported.",
+                "Maybe the Health Connect app is not installed?"
+            )
+            return
+        }
+
+        if (!::client.isInitialized) {
+            client = HealthConnectClient.getOrCreate(context!!)
+        }
+
         scope.launch {
             val type = call.argument<String>("type") ?: ""
             val recordId = call.argument<String>("id") ?: ""
