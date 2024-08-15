@@ -117,6 +117,7 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
         }
         replyMapper.registerModule(JavaTimeModule())
         replyMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        replyMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
