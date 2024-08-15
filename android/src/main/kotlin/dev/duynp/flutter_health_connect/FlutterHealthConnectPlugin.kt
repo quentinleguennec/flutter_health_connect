@@ -660,7 +660,7 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
                             }
 
                             is ExerciseRouteResult.NoData -> result.success(recordResult)
-                            else -> result.success(recordResult)
+                            else -> throw Throwable("Unexpected result $exerciseRouteResultValue")
                         }
 
                     } else {
