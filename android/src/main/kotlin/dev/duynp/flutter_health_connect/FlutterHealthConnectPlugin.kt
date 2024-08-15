@@ -147,7 +147,7 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
             (activity as ComponentActivity).registerForActivityResult(
                 ExerciseRouteRequestContract()
             ) { exerciseRoute: ExerciseRoute? ->
-                onExerciseRoutePermissionCallback(exerciseRoute)
+                onExerciseRouteRequestCallback(exerciseRoute)
             }
     }
 
@@ -598,7 +598,7 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
         }
     }
 
-    private fun onExerciseRoutePermissionCallback(exerciseRoute: ExerciseRoute?) {
+    private fun onExerciseRouteRequestCallback(exerciseRoute: ExerciseRoute?) {
         if (exerciseRoute != null) {
             exerciseRecordResult?.put(
                 "route", replyMapper.convertValue(
