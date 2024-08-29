@@ -500,11 +500,11 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
                     val start = startTime?.let { Instant.parse(it) } ?: Instant.now()
                         .minus(1, ChronoUnit.DAYS)
                     val end = endTime?.let { Instant.parse(it) } ?: Instant.now()
-                    val reply = client.deleteRecords(
+                    client.deleteRecords(
                         recordType = classType,
                         timeRangeFilter = TimeRangeFilter.between(start, end),
                     )
-                    result.success(reply)
+                    result.success(true)
                 } ?: throw Throwable("Unsupported type $type")
             } catch (e: SecurityException) {
                 result.error(ERROR_MISSING_PERMISSIONS, e.message, e)
@@ -535,8 +535,8 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
                 call.argument<List<String>>("clientRecordIdsList") ?: emptyList()
             try {
                 HealthConnectRecordTypeMap[type]?.let { classType ->
-                    val reply = client.deleteRecords(classType, idList, clientRecordIdsList)
-                    result.success(reply)
+                    client.deleteRecords(classType, idList, clientRecordIdsList)
+                    result.success(true)
                 } ?: throw Throwable("Unsupported type $type")
             } catch (e: SecurityException) {
                 result.error(ERROR_MISSING_PERMISSIONS, e.message, e)
@@ -1201,8 +1201,8 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
             }
             scope.launch {
                 try {
-                    client.insertRecords(recordsList)
-                    result.success(true)
+                    val response = client.insertRecords(recordsList)
+                    result.success(response.recordIdsList)
                 } catch (e: SecurityException) {
                     result.error(ERROR_MISSING_PERMISSIONS, e.message, e)
                 } catch (e: Throwable) {

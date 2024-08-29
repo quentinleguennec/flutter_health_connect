@@ -43,9 +43,3 @@ enum HealthConnectDataType {
   Weight,
   WheelchairPushes,
 }
-
-enum HealthConnectDataAccess {
-  READ,
-  WRITE,
-  READ_WRITE,
-}

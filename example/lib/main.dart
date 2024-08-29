@@ -17,55 +17,19 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   /// NOTE: [_checkIfShouldShowPrivacyPolicyChannel] needs to match the CHANNEL name defined in android/app/src/main/kotlin/dev/duynp/flutter_health_connect_example/MainActivity.kt
-  static const String _checkIfShouldShowPrivacyPolicyChannel = 'app.channel.flutter.health.connect.show.privacy.policy';
+  static const String _checkIfShouldShowPrivacyPolicyChannel =
+      'app.channel.flutter.health.connect.show.privacy.policy';
 
   /// NOTE: [_checkIfShouldShowPrivacyPolicyFunction] needs to match the FUNCTION name defined in android/app/src/main/kotlin/dev/duynp/flutter_health_connect_example/MainActivity.kt
-  static const String _checkIfShouldShowPrivacyPolicyFunction = 'checkIfShouldShowPrivacyPolicy';
-  static const MethodChannel platform = MethodChannel(_checkIfShouldShowPrivacyPolicyChannel);
+  static const String _checkIfShouldShowPrivacyPolicyFunction =
+      'checkIfShouldShowPrivacyPolicy';
+  static const MethodChannel platform =
+      MethodChannel(_checkIfShouldShowPrivacyPolicyChannel);
 
-  static const String _privacyPolicy = 'You asked to see our privacy policy.\n\n'
+  static const String _privacyPolicy =
+      'You asked to see our privacy policy.\n\n'
       'I would show it to you, but we both know these are always written in such a way that only lawyers can both read and understand them fully (at the cost of their sanity).\n\n'
       'Just accept it, and pray we somewhat have your best interest at heart.';
-
-  // List<HealthConnectDataType> types = [
-  //   HealthConnectDataType.ActiveCaloriesBurned,
-  //   HealthConnectDataType.BasalBodyTemperature,
-  //   HealthConnectDataType.BasalMetabolicRate,
-  //   HealthConnectDataType.BloodGlucose,
-  //   HealthConnectDataType.BloodPressure,
-  //   HealthConnectDataType.BodyFat,
-  //   HealthConnectDataType.BodyTemperature,
-  //   HealthConnectDataType.BodyWaterMass,
-  //   HealthConnectDataType.BoneMass,
-  //   HealthConnectDataType.CervicalMucus,
-  //   HealthConnectDataType.CyclingPedalingCadence,
-  //   HealthConnectDataType.Distance,
-  //   HealthConnectDataType.ElevationGained,
-  //   HealthConnectDataType.ExerciseSession,
-  //   HealthConnectDataType.FloorsClimbed,
-  //   HealthConnectDataType.HeartRate,
-  //   HealthConnectDataType.HeartRateVariabilityRmssd,
-  //   HealthConnectDataType.Height,
-  //   HealthConnectDataType.Hydration,
-  //   HealthConnectDataType.IntermenstrualBleeding,
-  //   HealthConnectDataType.LeanBodyMass,
-  //   HealthConnectDataType.MenstruationFlow,
-  //   HealthConnectDataType.Nutrition,
-  //   HealthConnectDataType.OvulationTest,
-  //   HealthConnectDataType.OxygenSaturation,
-  //   HealthConnectDataType.Power,
-  //   HealthConnectDataType.RespiratoryRate,
-  //   HealthConnectDataType.RestingHeartRate,
-  //   HealthConnectDataType.SexualActivity,
-  //   HealthConnectDataType.SleepSession,
-  //   HealthConnectDataType.Speed,
-  //   HealthConnectDataType.StepsCadence,
-  //   HealthConnectDataType.Steps,
-  //   HealthConnectDataType.TotalCaloriesBurned,
-  //   HealthConnectDataType.Vo2Max,
-  //   HealthConnectDataType.Weight,
-  //   HealthConnectDataType.WheelchairPushes,
-  // ];
 
   final List<HealthConnectDataType> _types = [
     HealthConnectDataType.Steps,
@@ -76,8 +40,7 @@ class _MyAppState extends State<MyApp> {
     // HealthConnectDataType.RespiratoryRate,
   ];
 
-  final bool _isReadOnly = true;
-
+  bool _isReadOnly = true;
   String _resultText = '';
   String _token = '';
 
@@ -99,7 +62,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<bool> _checkIfShouldShowPrivacyPolicy() async =>
-      await platform.invokeMethod(_checkIfShouldShowPrivacyPolicyFunction) as bool;
+      await platform.invokeMethod(_checkIfShouldShowPrivacyPolicyFunction)
+          as bool;
 
   void _updateResultText(String newText) {
     if (context.mounted) {
@@ -109,7 +73,8 @@ class _MyAppState extends State<MyApp> {
 
   void _onCheckIfSupportedButtonTap() async {
     try {
-      final bool checkIfSupported = await HealthConnectFactory.checkIfSupported();
+      final bool checkIfSupported =
+          await HealthConnectFactory.checkIfSupported();
       _updateResultText('checkIfSupported: $checkIfSupported');
     } catch (e, stackTrace) {
       final String errorMessage = '$e,\n$stackTrace';
@@ -120,8 +85,10 @@ class _MyAppState extends State<MyApp> {
 
   void _onCheckIfHealthConnectAppInstalledButtonTap() async {
     try {
-      final bool checkIfHealthConnectAppInstalled = await HealthConnectFactory.checkIfHealthConnectAppInstalled();
-      _updateResultText('checkIfHealthConnectAppInstalled: $checkIfHealthConnectAppInstalled');
+      final bool checkIfHealthConnectAppInstalled =
+          await HealthConnectFactory.checkIfHealthConnectAppInstalled();
+      _updateResultText(
+          'checkIfHealthConnectAppInstalled: $checkIfHealthConnectAppInstalled');
     } catch (e, stackTrace) {
       final String errorMessage = '$e,\n$stackTrace';
       debugPrint(errorMessage);
@@ -179,11 +146,13 @@ class _MyAppState extends State<MyApp> {
   void _onGetChangesButtonTap() async {
     try {
       if (_token.isEmpty) {
-        _updateResultText('Changes: Before getting the changes you need to generate the changes token.');
+        _updateResultText(
+            'Changes: Before getting the changes you need to generate the changes token.');
         return;
       }
 
-      final Map<String, dynamic> changes = await HealthConnectFactory.getChanges(_token);
+      final Map<String, dynamic> changes =
+          await HealthConnectFactory.getChanges(_token);
       _updateResultText('Changes: $changes');
     } catch (e, stackTrace) {
       final String errorMessage = '$e,\n$stackTrace';
@@ -204,7 +173,8 @@ class _MyAppState extends State<MyApp> {
       /// from here when the user taps the "privacy policy" button in Google Health's permission dialog.
       /// If it is instead set to "standard" or "singleTop" then the code under will NOT be called, and initState
       /// will be called instead.
-      final bool shouldShowPrivacyPolicy = await _checkIfShouldShowPrivacyPolicy();
+      final bool shouldShowPrivacyPolicy =
+          await _checkIfShouldShowPrivacyPolicy();
       if (shouldShowPrivacyPolicy) {
         _updateResultText(_privacyPolicy);
       } else {
@@ -219,7 +189,8 @@ class _MyAppState extends State<MyApp> {
 
   void _onGetRecordsButtonTap() async {
     try {
-      final DateTime startTime = DateTime.now().subtract(const Duration(days: 4));
+      final DateTime startTime =
+          DateTime.now().subtract(const Duration(days: 4));
       final DateTime endTime = DateTime.now();
       final List<Future<dynamic>> requests = [];
       final Map<String, dynamic> typePoints = {};
@@ -245,34 +216,46 @@ class _MyAppState extends State<MyApp> {
 
   void _onSendRecordsButtonTap() async {
     try {
-      final DateTime startTime = DateTime.now().subtract(const Duration(seconds: 5));
+      final DateTime startTime =
+          DateTime.now().subtract(const Duration(seconds: 5));
       final DateTime endTime = DateTime.now();
+
       final StepsRecord stepsRecord = StepsRecord(
         startTime: startTime,
         endTime: endTime,
         count: 5,
       );
+
       final ExerciseSessionRecord exerciseSessionRecord = ExerciseSessionRecord(
         startTime: startTime,
         endTime: endTime,
         exerciseType: ExerciseType.walking,
       );
-      final List<Future<dynamic>> requests = [];
-      final Map<String, dynamic> typePoints = {};
 
-      requests.add(HealthConnectFactory.writeData(
-        type: HealthConnectDataType.Steps,
-        data: [stepsRecord],
-      ).then((value) => typePoints.addAll({HealthConnectDataType.Steps.name: stepsRecord})));
+      final List<Future<List<String>>> requests = [
+        HealthConnectFactory.writeData(
+          type: HealthConnectDataType.Steps,
+          data: [stepsRecord],
+        ),
+        HealthConnectFactory.writeData(
+          type: HealthConnectDataType.ExerciseSession,
+          data: [exerciseSessionRecord],
+        ),
+      ];
 
-      requests.add(HealthConnectFactory.writeData(
-        type: HealthConnectDataType.ExerciseSession,
-        data: [exerciseSessionRecord],
-      ).then((value) => typePoints.addAll({HealthConnectDataType.ExerciseSession.name: exerciseSessionRecord})));
+      final List<List<String>> results = await Future.wait(requests);
 
-      await Future.wait(requests);
+      final List<String> createdUids = results.reduce(
+        (uids, result) => [...uids, ...result],
+      );
+      final Map<String, dynamic> createdRecords = {
+        HealthConnectDataType.Steps.name: stepsRecord,
+        HealthConnectDataType.ExerciseSession.name: exerciseSessionRecord
+      };
 
-      _updateResultText('$typePoints');
+      _updateResultText(
+        'Created ${createdUids.length} new records with uids = $createdUids\n\nRecords data:\n$createdRecords',
+      );
     } catch (e, stackTrace) {
       final String errorMessage = '$e,\n$stackTrace';
       debugPrint(errorMessage);
@@ -282,7 +265,8 @@ class _MyAppState extends State<MyApp> {
 
   void _onGetAggregatedDataButtonTap() async {
     try {
-      final DateTime startTime = DateTime.now().subtract(const Duration(days: 1));
+      final DateTime startTime =
+          DateTime.now().subtract(const Duration(days: 1));
       final DateTime endTime = DateTime.now();
       final Map<String, double> result = await HealthConnectFactory.aggregate(
         aggregationKeys: [
@@ -300,6 +284,73 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  void _onDeleteRecordByIdButtonTap() async {
+    try {
+      const HealthConnectDataType type = HealthConnectDataType.Steps;
+      final DateTime startTime =
+          DateTime.now().subtract(const Duration(days: 1));
+      final DateTime endTime = DateTime.now();
+
+      final StepsRecord stepsRecord = StepsRecord(
+        startTime: startTime,
+        endTime: endTime,
+        count: 5,
+      );
+
+      final List<String> createdUids = await HealthConnectFactory.writeData(
+        type: type,
+        data: [stepsRecord],
+      );
+
+      final bool result = await HealthConnectFactory.deleteRecordsByIds(
+        type: type,
+        idList: createdUids,
+      );
+
+      _updateResultText(
+        'Did operation succeed: $result\nCreated the record with uid = ${createdUids.firstOrNull} and deleted it right after based on its uid.',
+      );
+    } catch (e, stackTrace) {
+      final String errorMessage = '$e,\n$stackTrace';
+      debugPrint(errorMessage);
+      _updateResultText(errorMessage);
+    }
+  }
+
+  void _onDeleteRecordByTimesButtonTap() async {
+    try {
+      const HealthConnectDataType type = HealthConnectDataType.Steps;
+      final DateTime startTime =
+          DateTime.now().subtract(const Duration(days: 1));
+      final DateTime endTime = DateTime.now();
+
+      final StepsRecord stepsRecord = StepsRecord(
+        startTime: startTime,
+        endTime: endTime,
+        count: 5,
+      );
+
+      final List<String> createdUids = await HealthConnectFactory.writeData(
+        type: type,
+        data: [stepsRecord],
+      );
+
+      final bool result = await HealthConnectFactory.deleteRecordsByTime(
+        type: type,
+        startTime: startTime,
+        endTime: endTime,
+      );
+
+      _updateResultText(
+        'Did operation succeed: $result\nCreated the record with uid = ${createdUids.firstOrNull} and deleted it right after based on its start and end time.',
+      );
+    } catch (e, stackTrace) {
+      final String errorMessage = '$e,\n$stackTrace';
+      debugPrint(errorMessage);
+      _updateResultText(errorMessage);
+    }
+  }
+
   @override
   Widget build(BuildContext context) => MaterialApp(
         home: Scaffold(
@@ -309,13 +360,32 @@ class _MyAppState extends State<MyApp> {
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      const Text('Is read only'),
+                      const SizedBox.square(dimension: 16),
+                      Switch(
+                        value: _isReadOnly,
+                        onChanged: (value) => setState(
+                          () => _isReadOnly = value,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               ElevatedButton(
                 onPressed: () => _onCheckIfSupportedButtonTap(),
                 child: const Text('Check if Api is supported'),
               ),
               ElevatedButton(
                 onPressed: () => _onCheckIfHealthConnectAppInstalledButtonTap(),
-                child: const Text('Check if Google Health Connect app is installed'),
+                child: const Text(
+                    'Check if Google Health Connect app is installed'),
               ),
               ElevatedButton(
                 onPressed: () => _onInstallHealthConnectButtonTap(),
@@ -353,7 +423,18 @@ class _MyAppState extends State<MyApp> {
                 onPressed: () => _onGetAggregatedDataButtonTap(),
                 child: const Text('Get aggregated data'),
               ),
-              Text(_resultText),
+              ElevatedButton(
+                onPressed: () => _onDeleteRecordByIdButtonTap(),
+                child: const Text('Create a Record and delete it by id'),
+              ),
+              ElevatedButton(
+                onPressed: () => _onDeleteRecordByTimesButtonTap(),
+                child: const Text('Create a Record and delete it by time'),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Text(_resultText),
+              ),
             ],
           ),
         ),

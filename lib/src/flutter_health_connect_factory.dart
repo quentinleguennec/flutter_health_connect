@@ -19,18 +19,27 @@ extension _PlatformExceptionExtension on PlatformException {
 class HealthConnectFactory {
   static const MethodChannel _channel = MethodChannel('flutter_health_connect');
 
+  /// Returns true if the Android version can support Health Connect, and false otherwise.
+  /// NOTE: Even if this function returns true you should still call [checkIfHealthConnectAppInstalled] to check
+  /// if the Health Connect app is actually installed.
   static Future<bool> checkIfSupported() async {
     return await _channel.invokeMethod('checkIfSupported') as bool;
   }
 
+  /// Returns true if the Health Connect app is installed, and false otherwise.
+  /// On newer versions of Android the Health Connect app is usually installed by default.
+  /// On older versions users have to download it from the Play Store.
   static Future<bool> checkIfHealthConnectAppInstalled() async {
     return await _channel.invokeMethod('checkIfHealthConnectAppInstalled') as bool;
   }
 
+  /// Opens the Play Store page to download and install the Health Connect app.
   static Future<void> installHealthConnect() async {
     await _channel.invokeMethod('installHealthConnect');
   }
 
+  /// Opens the Health Connect setting page where users can see and change the permissions they granted to your app.
+  /// See: https://developer.android.com/health-and-fitness/guides/health-connect/develop/get-started#step-4
   static Future<bool> openHealthConnectSettings() async {
     final bool isHealthConnectAppInstalled = await checkIfHealthConnectAppInstalled();
     if (!isHealthConnectAppInstalled) {
@@ -54,6 +63,10 @@ class HealthConnectFactory {
     }
   }
 
+  /// Check if the permissions were reviewed by the user for the given [types]
+  /// Set [readOnly] to false if you also what to check writing permissions.
+  ///
+  /// See: https://developer.android.com/health-and-fitness/guides/health-connect/develop/get-started#step-4
   static Future<bool> checkPermissions(
     List<HealthConnectDataType> types, {
     bool readOnly = false,
@@ -76,6 +89,10 @@ class HealthConnectFactory {
     }
   }
 
+  /// Request permissions for the given [types].
+  /// Set [readOnly] to false if you also need writing permissions.
+  ///
+  /// See: https://developer.android.com/health-and-fitness/guides/health-connect/develop/get-started#step-4
   static Future<bool> requestPermissions(
     List<HealthConnectDataType> types, {
     bool readOnly = false,
@@ -98,6 +115,10 @@ class HealthConnectFactory {
     }
   }
 
+
+  /// Gat a change token to be used with [getChanges].
+  ///
+  /// See: https://developer.android.com/health-and-fitness/guides/health-connect/develop/sync-data
   static Future<String> getChangesToken(List<HealthConnectDataType> types) async {
     try {
       return await _channel.invokeMethod(
@@ -116,6 +137,10 @@ class HealthConnectFactory {
     }
   }
 
+  /// Get all the data that changed based on the change [token].
+  /// You need to get a change token with [getChangesToken] to pass it to this function.
+  ///
+  /// See: https://developer.android.com/health-and-fitness/guides/health-connect/develop/sync-data
   static Future<Map<String, dynamic>> getChanges(String token) async {
     try {
       return await _channel.invokeMethod(
@@ -136,6 +161,13 @@ class HealthConnectFactory {
     }
   }
 
+  /// Read the Records of the given [type] that happened between [startTime] and [endTime].
+  ///
+  /// Health Connect can read data for up to 30 days prior to when any permission was first granted.
+  /// However, if a user deletes your app, the permission history is lost. If the user re-installs your app and
+  /// grants permission again, your app can read data from Health Connect up to 30 days prior to that new date.
+  ///
+  /// See: https://developer.android.com/health-and-fitness/guides/health-connect/develop/read-data
   static Future<List<dynamic>> getRecords({
     required DateTime startTime,
     required DateTime endTime,
@@ -172,7 +204,10 @@ class HealthConnectFactory {
     }
   }
 
-  static Future<bool> writeData({
+  /// Returns a List of all the uids of the created records.
+  ///
+  /// See: https://developer.android.com/health-and-fitness/guides/health-connect/develop/write-data
+  static Future<List<String>> writeData({
     required HealthConnectDataType type,
     required List<Record> data,
   }) async {
@@ -181,7 +216,8 @@ class HealthConnectFactory {
       'data': List<Map<String, dynamic>>.from(data.map((Record e) => e.toMap())),
     };
     try {
-      return await _channel.invokeMethod('writeData', args);
+      final List<dynamic>? result = await _channel.invokeMethod('writeData', args);
+      return result == null ? [] : result.cast<String>();
     } on PlatformException catch (e, stackTrace) {
       throw FlutterHealthConnectException(
         code: e.errorCode,
@@ -192,6 +228,10 @@ class HealthConnectFactory {
     }
   }
 
+  /// Delete your records of [type] based on their IDs.
+  /// Deletion of multiple Record is executed in single transaction - if one fails, none is deleted.
+  ///
+  /// See: https://developer.android.com/health-and-fitness/guides/health-connect/develop/delete-data
   static Future<bool> deleteRecordsByIds({
     required HealthConnectDataType type,
     List<String> idList = const [],
@@ -214,6 +254,10 @@ class HealthConnectFactory {
     }
   }
 
+  /// Delete all your records of [type] that happened between [startTime] and [endTime].
+  /// Deletion of multiple Record is executed in single transaction - if one fails, none is deleted.
+  ///
+  /// See: https://developer.android.com/health-and-fitness/guides/health-connect/develop/delete-data
   static Future<bool> deleteRecordsByTime({
     required HealthConnectDataType type,
     required DateTime startTime,

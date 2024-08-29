@@ -1,3 +1,10 @@
+## [4.0.0]
+* **BREAKING:** `writeData` now returns a list of the uids of the created Records instead of a boolean.
+* Fixed `deleteRecordsByIds`, which would delete the records but then throw an error.
+* Fixed `deleteRecordsByTime`, which would delete the records but then throw an error.
+* Added documentation.
+* Improved the Example app to add a button for each `deleteRecordsByIds` and `deleteRecordsByTime`.
+
 ## [3.0.0]
 * **BREAKING:** All apps using this plugin must update their AndroidManifest.xml to add the "activity-alias". This will fix the "App update needed" issue when asking for permission.
 * Now handling Android 14
