@@ -27,46 +27,6 @@ class _MyAppState extends State<MyApp> {
       'I would show it to you, but we both know these are always written in such a way that only lawyers can both read and understand them fully (at the cost of their sanity).\n\n'
       'Just accept it, and pray we somewhat have your best interest at heart.';
 
-  // List<HealthConnectDataType> types = [
-  //   HealthConnectDataType.ActiveCaloriesBurned,
-  //   HealthConnectDataType.BasalBodyTemperature,
-  //   HealthConnectDataType.BasalMetabolicRate,
-  //   HealthConnectDataType.BloodGlucose,
-  //   HealthConnectDataType.BloodPressure,
-  //   HealthConnectDataType.BodyFat,
-  //   HealthConnectDataType.BodyTemperature,
-  //   HealthConnectDataType.BodyWaterMass,
-  //   HealthConnectDataType.BoneMass,
-  //   HealthConnectDataType.CervicalMucus,
-  //   HealthConnectDataType.CyclingPedalingCadence,
-  //   HealthConnectDataType.Distance,
-  //   HealthConnectDataType.ElevationGained,
-  //   HealthConnectDataType.ExerciseSession,
-  //   HealthConnectDataType.FloorsClimbed,
-  //   HealthConnectDataType.HeartRate,
-  //   HealthConnectDataType.HeartRateVariabilityRmssd,
-  //   HealthConnectDataType.Height,
-  //   HealthConnectDataType.Hydration,
-  //   HealthConnectDataType.IntermenstrualBleeding,
-  //   HealthConnectDataType.LeanBodyMass,
-  //   HealthConnectDataType.MenstruationFlow,
-  //   HealthConnectDataType.Nutrition,
-  //   HealthConnectDataType.OvulationTest,
-  //   HealthConnectDataType.OxygenSaturation,
-  //   HealthConnectDataType.Power,
-  //   HealthConnectDataType.RespiratoryRate,
-  //   HealthConnectDataType.RestingHeartRate,
-  //   HealthConnectDataType.SexualActivity,
-  //   HealthConnectDataType.SleepSession,
-  //   HealthConnectDataType.Speed,
-  //   HealthConnectDataType.StepsCadence,
-  //   HealthConnectDataType.Steps,
-  //   HealthConnectDataType.TotalCaloriesBurned,
-  //   HealthConnectDataType.Vo2Max,
-  //   HealthConnectDataType.Weight,
-  //   HealthConnectDataType.WheelchairPushes,
-  // ];
-
   final List<HealthConnectDataType> _types = [
     HealthConnectDataType.Steps,
     HealthConnectDataType.ExerciseSession,
@@ -76,8 +36,7 @@ class _MyAppState extends State<MyApp> {
     // HealthConnectDataType.RespiratoryRate,
   ];
 
-  final bool _isReadOnly = true;
-
+  bool _isReadOnly = true;
   String _resultText = '';
   String _token = '';
 
@@ -247,32 +206,43 @@ class _MyAppState extends State<MyApp> {
     try {
       final DateTime startTime = DateTime.now().subtract(const Duration(seconds: 5));
       final DateTime endTime = DateTime.now();
+
       final StepsRecord stepsRecord = StepsRecord(
         startTime: startTime,
         endTime: endTime,
         count: 5,
       );
+
       final ExerciseSessionRecord exerciseSessionRecord = ExerciseSessionRecord(
         startTime: startTime,
         endTime: endTime,
         exerciseType: ExerciseType.walking,
       );
-      final List<Future<dynamic>> requests = [];
-      final Map<String, dynamic> typePoints = {};
 
-      requests.add(HealthConnectFactory.writeData(
-        type: HealthConnectDataType.Steps,
-        data: [stepsRecord],
-      ).then((value) => typePoints.addAll({HealthConnectDataType.Steps.name: stepsRecord})));
+      final List<Future<List<String>>> requests = [
+        HealthConnectFactory.writeData(
+          type: HealthConnectDataType.Steps,
+          data: [stepsRecord],
+        ),
+        HealthConnectFactory.writeData(
+          type: HealthConnectDataType.ExerciseSession,
+          data: [exerciseSessionRecord],
+        ),
+      ];
 
-      requests.add(HealthConnectFactory.writeData(
-        type: HealthConnectDataType.ExerciseSession,
-        data: [exerciseSessionRecord],
-      ).then((value) => typePoints.addAll({HealthConnectDataType.ExerciseSession.name: exerciseSessionRecord})));
+      final List<List<String>> results = await Future.wait(requests);
 
-      await Future.wait(requests);
+      final List<String> createdUids = results.reduce(
+        (uids, result) => [...uids, ...result],
+      );
+      final Map<String, dynamic> createdRecords = {
+        HealthConnectDataType.Steps.name: stepsRecord,
+        HealthConnectDataType.ExerciseSession.name: exerciseSessionRecord
+      };
 
-      _updateResultText('$typePoints');
+      _updateResultText(
+        'Created ${createdUids.length} new records with uids = $createdUids\n\nRecords data:\n$createdRecords',
+      );
     } catch (e, stackTrace) {
       final String errorMessage = '$e,\n$stackTrace';
       debugPrint(errorMessage);
@@ -300,6 +270,71 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  void _onDeleteRecordByIdButtonTap() async {
+    try {
+      const HealthConnectDataType type = HealthConnectDataType.Steps;
+      final DateTime startTime = DateTime.now().subtract(const Duration(days: 1));
+      final DateTime endTime = DateTime.now();
+
+      final StepsRecord stepsRecord = StepsRecord(
+        startTime: startTime,
+        endTime: endTime,
+        count: 5,
+      );
+
+      final List<String> createdUids = await HealthConnectFactory.writeData(
+        type: type,
+        data: [stepsRecord],
+      );
+
+      final bool result = await HealthConnectFactory.deleteRecordsByIds(
+        type: type,
+        idList: createdUids,
+      );
+
+      _updateResultText(
+        'Did operation succeed: $result\nCreated the record with uid = ${createdUids.firstOrNull} and deleted it right after based on its uid.',
+      );
+    } catch (e, stackTrace) {
+      final String errorMessage = '$e,\n$stackTrace';
+      debugPrint(errorMessage);
+      _updateResultText(errorMessage);
+    }
+  }
+
+  void _onDeleteRecordByTimesButtonTap() async {
+    try {
+      const HealthConnectDataType type = HealthConnectDataType.Steps;
+      final DateTime startTime = DateTime.now().subtract(const Duration(days: 1));
+      final DateTime endTime = DateTime.now();
+
+      final StepsRecord stepsRecord = StepsRecord(
+        startTime: startTime,
+        endTime: endTime,
+        count: 5,
+      );
+
+      final List<String> createdUids = await HealthConnectFactory.writeData(
+        type: type,
+        data: [stepsRecord],
+      );
+
+      final bool result = await HealthConnectFactory.deleteRecordsByTime(
+        type: type,
+        startTime: startTime,
+        endTime: endTime,
+      );
+
+      _updateResultText(
+        'Did operation succeed: $result\nCreated the record with uid = ${createdUids.firstOrNull} and deleted it right after based on its start and end time.',
+      );
+    } catch (e, stackTrace) {
+      final String errorMessage = '$e,\n$stackTrace';
+      debugPrint(errorMessage);
+      _updateResultText(errorMessage);
+    }
+  }
+
   @override
   Widget build(BuildContext context) => MaterialApp(
         home: Scaffold(
@@ -309,6 +344,24 @@ class _MyAppState extends State<MyApp> {
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      const Text('Is read only'),
+                      const SizedBox.square(dimension: 16),
+                      Switch(
+                        value: _isReadOnly,
+                        onChanged: (value) => setState(
+                          () => _isReadOnly = value,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               ElevatedButton(
                 onPressed: () => _onCheckIfSupportedButtonTap(),
                 child: const Text('Check if Api is supported'),
@@ -353,7 +406,18 @@ class _MyAppState extends State<MyApp> {
                 onPressed: () => _onGetAggregatedDataButtonTap(),
                 child: const Text('Get aggregated data'),
               ),
-              Text(_resultText),
+              ElevatedButton(
+                onPressed: () => _onDeleteRecordByIdButtonTap(),
+                child: const Text('Create a Record and delete it by id'),
+              ),
+              ElevatedButton(
+                onPressed: () => _onDeleteRecordByTimesButtonTap(),
+                child: const Text('Create a Record and delete it by time'),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Text(_resultText),
+              ),
             ],
           ),
         ),
