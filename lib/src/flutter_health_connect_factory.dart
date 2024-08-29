@@ -339,6 +339,32 @@ class HealthConnectFactory {
     }
   }
 
+  static Future<dynamic> getRecordById({
+    required String id,
+    required HealthConnectDataType type,
+  }) async {
+    final args = <String, dynamic>{
+      'type': type.name,
+      'id': id,
+    };
+    try {
+      final Map<dynamic, dynamic>? data =
+          await _channel.invokeMethod('getRecordById', args);
+      if (data != null && data.isNotEmpty) {
+        return mapToRecord(type, Map<String, dynamic>.from(data));
+      } else {
+        return null;
+      }
+    } on PlatformException catch (e, stackTrace) {
+      throw FlutterHealthConnectException(
+        code: e.errorCode,
+        message: e.toString(),
+        details: e.details,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
   static dynamic mapToRecord(HealthConnectDataType type, Map<String, dynamic> map) {
     switch (type) {
       case HealthConnectDataType.ActiveCaloriesBurned:

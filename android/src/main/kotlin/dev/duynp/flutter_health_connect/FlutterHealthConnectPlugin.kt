@@ -48,6 +48,8 @@ import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.records.Vo2MaxRecord
 import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.records.WheelchairPushesRecord
+import androidx.health.connect.client.contracts.ExerciseRouteRequestContract
+import androidx.health.connect.client.records.*
 import androidx.health.connect.client.records.metadata.DataOrigin
 import androidx.health.connect.client.records.metadata.Device
 import androidx.health.connect.client.records.metadata.Metadata
@@ -88,11 +90,14 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
     MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener {
     private var replyMapper: ObjectMapper = ObjectMapper()
     private var permissionResult: Result? = null
+    private var exerciseRouteResult: Result? = null
+    private var exerciseRecordResult: MutableMap<String, Any?>? = null
     private lateinit var client: HealthConnectClient
     private var activity: Activity? = null
     private var context: Context? = null
     private lateinit var scope: CoroutineScope
     private var healthConnectRequestPermissionsLauncher: ActivityResultLauncher<Set<String>>? = null
+    private var requestExerciseRouteLauncher: ActivityResultLauncher<String>? = null
 
     companion object {
         private const val ERROR_UNABLE_TO_OPEN_HEALTH_CONNECT_APP =
@@ -112,12 +117,15 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
         }
         replyMapper.registerModule(JavaTimeModule())
         replyMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        replyMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         scope.cancel()
         channel = null
         activity = null
+        exerciseRecordResult = null
+        exerciseRouteResult = null
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
@@ -135,6 +143,12 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
             ) { granted ->
                 onHealthConnectPermissionCallback(granted)
             }
+        requestExerciseRouteLauncher =
+            (activity as ComponentActivity).registerForActivityResult(
+                ExerciseRouteRequestContract()
+            ) { exerciseRoute: ExerciseRoute? ->
+                onExerciseRouteRequestCallback(exerciseRoute)
+            }
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
@@ -151,6 +165,9 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
         }
         activity = null
         healthConnectRequestPermissionsLauncher = null
+        requestExerciseRouteLauncher = null
+        exerciseRecordResult = null
+        exerciseRouteResult = null
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -183,6 +200,8 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
             "aggregate" -> aggregate(call, result)
 
             "writeData" -> writeData(call, result)
+
+            "getRecordById" -> getRecordById(call, result)
 
             else -> {
                 result.notImplemented()
@@ -574,6 +593,83 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
             } catch (e: SecurityException) {
                 result.error(ERROR_MISSING_PERMISSIONS, e.message, e)
             } catch (e: Exception) {
+                result.error(ERROR_UNKNOWN, e.message, e)
+            }
+        }
+    }
+
+    private fun onExerciseRouteRequestCallback(exerciseRoute: ExerciseRoute?) {
+        if (exerciseRoute != null) {
+            exerciseRecordResult?.put(
+                "route", replyMapper.convertValue(
+                    exerciseRoute,
+                    hashMapOf<String, Any?>()::class.java
+                )
+            )
+            exerciseRouteResult?.success(exerciseRecordResult)
+        } else {
+            exerciseRouteResult?.success(exerciseRecordResult)
+        }
+        exerciseRecordResult = null
+        exerciseRouteResult = null
+    }
+
+    private fun getRecordById(call: MethodCall, result: Result) {
+        if (!checkIfApiReady()) {
+            result.error(
+                ERROR_NOT_AVAILABLE,
+                "The API is not supported.",
+                "Maybe the Health Connect app is not installed?"
+            )
+            return
+        }
+
+        if (!::client.isInitialized) {
+            client = HealthConnectClient.getOrCreate(context!!)
+        }
+
+        scope.launch {
+            val type = call.argument<String>("type") ?: ""
+            val recordId = call.argument<String>("id") ?: ""
+            val recordResult = mutableMapOf<String, Any?>()
+            try {
+                HealthConnectRecordTypeMap[type]?.let { classType ->
+                    val reply = client.readRecord(classType, recordId)
+                    val record = reply.record
+                    recordResult.putAll(
+                        replyMapper.convertValue(
+                            record,
+                            hashMapOf<String, Any?>()::class.java
+                        )
+                    )
+                    if (record is ExerciseSessionRecord) {
+                        when (val exerciseRouteResultValue =
+                            record.exerciseRouteResult) {
+                            is ExerciseRouteResult.Data -> {
+                                recordResult["route"] = replyMapper.convertValue(
+                                    exerciseRouteResultValue.exerciseRoute,
+                                    hashMapOf<String, Any?>()::class.java
+                                )
+                                result.success(recordResult)
+                            }
+
+                            is ExerciseRouteResult.ConsentRequired -> {
+                                exerciseRouteResult = result
+                                exerciseRecordResult = recordResult
+                                requestExerciseRouteLauncher?.launch(recordId)
+                            }
+
+                            is ExerciseRouteResult.NoData -> result.success(recordResult)
+                            else -> throw Throwable("Unexpected result $exerciseRouteResultValue")
+                        }
+
+                    } else {
+                        result.success(recordResult)
+                    }
+                } ?: throw Throwable("Unsupported type $type")
+            } catch (e: SecurityException) {
+                result.error(ERROR_MISSING_PERMISSIONS, e.message, e)
+            } catch (e: Throwable) {
                 result.error(ERROR_UNKNOWN, e.message, e)
             }
         }

@@ -1,4 +1,5 @@
 import 'package:flutter_health_connect/src/records/interval_record.dart';
+import 'package:flutter_health_connect/src/utils/datetime_utils.dart';
 
 import 'exercise_lap.dart';
 import 'exercise_route.dart';
@@ -120,13 +121,9 @@ class ExerciseSessionRecord extends IntervalRecord {
   factory ExerciseSessionRecord.fromMap(Map<String, dynamic> map) {
     return ExerciseSessionRecord(
       startTime: DateTime.parse(map['startTime']),
-      startZoneOffset: map['startZoneOffset'] != null
-          ? Duration(hours: map['startZoneOffset'] as int)
-          : null,
+      startZoneOffset: DateTimeUtils.parseDuration(map['startZoneOffset']),
       endTime: DateTime.parse(map['endTime']),
-      endZoneOffset: map['endZoneOffset'] != null
-          ? Duration(hours: map['endZoneOffset'] as int)
-          : null,
+      endZoneOffset: DateTimeUtils.parseDuration(map['endZoneOffset']),
       metadata: Metadata.fromMap(Map<String, dynamic>.from(map['metadata'])),
       exerciseType: ExerciseType.fromValue(map['exerciseType']),
       title: map['title'],
@@ -135,7 +132,9 @@ class ExerciseSessionRecord extends IntervalRecord {
           map['segments']?.map((x) => ExerciseSegment.fromMap(x))),
       laps: List<ExerciseLap>.from(
           map['laps']?.map((x) => ExerciseLap.fromMap(x))),
-      route: map['route'] != null ? ExerciseRoute.fromMap(map['route']) : null,
+      route: map['route'] != null
+          ? ExerciseRoute.fromMap(Map<String, dynamic>.from(map['route']))
+          : null,
     );
   }
 

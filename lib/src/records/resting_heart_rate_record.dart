@@ -1,5 +1,6 @@
 import 'package:flutter_health_connect/src/records/instantaneous_record.dart';
 import 'package:flutter_health_connect/src/records/metadata/metadata.dart';
+import 'package:flutter_health_connect/src/utils/datetime_utils.dart';
 
 class RestingHeartRateRecord extends InstantaneousRecord {
   /// Unit: Beats per minute (BPM)
@@ -53,9 +54,7 @@ class RestingHeartRateRecord extends InstantaneousRecord {
   factory RestingHeartRateRecord.fromMap(Map<String, dynamic> map) {
     return RestingHeartRateRecord(
       time: DateTime.parse(map['time']),
-      zoneOffset: map['zoneOffset'] != null
-          ? Duration(hours: map['zoneOffset'] as int)
-          : null,
+      zoneOffset: DateTimeUtils.parseDuration(map['zoneOffset']),
       metadata: Metadata.fromMap(Map<String, dynamic>.from(map['metadata'])),
       beatsPerMinute: map['beatsPerMinute'] as int,
     );

@@ -37,7 +37,8 @@ class ExerciseRoute {
 
   factory ExerciseRoute.fromMap(Map<String, dynamic> map) {
     return ExerciseRoute(
-      route: List<Location>.from(map['route']?.map((x) => Location.fromMap(x))),
+      route: List<Location>.from(map['route']
+          ?.map((x) => Location.fromMap(Map<String, dynamic>.from(x)))),
     );
   }
 
