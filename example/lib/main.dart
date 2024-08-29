@@ -187,7 +187,7 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  void _onGetRecordsButtonTap() async {
+  void _onGetRecordsByTimeButtonTap() async {
     try {
       final DateTime startTime =
           DateTime.now().subtract(const Duration(days: 4));
@@ -207,6 +207,39 @@ class _MyAppState extends State<MyApp> {
       }
       await Future.wait(requests);
       _updateResultText('$typePoints');
+    } catch (e, stackTrace) {
+      final String errorMessage = '$e,\n$stackTrace';
+      debugPrint(errorMessage);
+      _updateResultText(errorMessage);
+    }
+  }
+
+  void _onGetRecordByIdButtonTap() async {
+    try {
+      const HealthConnectDataType type = HealthConnectDataType.Steps;
+      final DateTime startTime =
+          DateTime.now().subtract(const Duration(days: 1));
+      final DateTime endTime = DateTime.now();
+
+      final StepsRecord stepsRecord = StepsRecord(
+        startTime: startTime,
+        endTime: endTime,
+        count: 5,
+      );
+
+      final List<String> createdUids = await HealthConnectFactory.writeData(
+        type: type,
+        data: [stepsRecord],
+      );
+
+      final dynamic record = await HealthConnectFactory.getRecordById(
+        type: type,
+        id: createdUids.first,
+      );
+
+      _updateResultText(
+        'Created the record with uid = ${createdUids.firstOrNull} and read it right after.\n\n$record',
+      );
     } catch (e, stackTrace) {
       final String errorMessage = '$e,\n$stackTrace';
       debugPrint(errorMessage);
@@ -400,20 +433,24 @@ class _MyAppState extends State<MyApp> {
                 child: const Text('Check if permissions are granted'),
               ),
               ElevatedButton(
+                onPressed: () => _onRequestPermissionsButtonTap(),
+                child: const Text('Request Permissions'),
+              ),
+              ElevatedButton(
+                onPressed: () => _onGetRecordsByTimeButtonTap(),
+                child: const Text('Get Records by times'),
+              ),
+              ElevatedButton(
+                onPressed: () => _onGetRecordByIdButtonTap(),
+                child: const Text('Get Record by id'),
+              ),
+              ElevatedButton(
                 onPressed: () => _onGetChangesTokenButtonTap(),
                 child: const Text('Get Changes Token'),
               ),
               ElevatedButton(
                 onPressed: () => _onGetChangesButtonTap(),
                 child: const Text('Get Changes'),
-              ),
-              ElevatedButton(
-                onPressed: () => _onRequestPermissionsButtonTap(),
-                child: const Text('Request Permissions'),
-              ),
-              ElevatedButton(
-                onPressed: () => _onGetRecordsButtonTap(),
-                child: const Text('Get Records'),
               ),
               ElevatedButton(
                 onPressed: () => _onSendRecordsButtonTap(),

@@ -1,3 +1,8 @@
+## [4.1.0]
+* Fixed issue with timestamps: [#1](https://github.com/quentinleguennec/flutter_health_connect/pull/1) by [AliakseiT](https://github.com/AliakseiT) and [nikolaydymura](https://github.com/nikolaydymura)
+* Added `getRecordById` [#1](https://github.com/quentinleguennec/flutter_health_connect/pull/1) by [AliakseiT](https://github.com/AliakseiT) and [nikolaydymura](https://github.com/nikolaydymura)
+* Improved the Example app to add a button for `getRecordById`.
+
 ## [4.0.0]
 * **BREAKING:** `writeData` now returns a list of the uids of the created Records instead of a boolean.
 * Fixed `deleteRecordsByIds`, which would delete the records but then throw an error.
