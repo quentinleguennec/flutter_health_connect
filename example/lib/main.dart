@@ -17,13 +17,17 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   /// NOTE: [_checkIfShouldShowPrivacyPolicyChannel] needs to match the CHANNEL name defined in android/app/src/main/kotlin/dev/duynp/flutter_health_connect_example/MainActivity.kt
-  static const String _checkIfShouldShowPrivacyPolicyChannel = 'app.channel.flutter.health.connect.show.privacy.policy';
+  static const String _checkIfShouldShowPrivacyPolicyChannel =
+      'app.channel.flutter.health.connect.show.privacy.policy';
 
   /// NOTE: [_checkIfShouldShowPrivacyPolicyFunction] needs to match the FUNCTION name defined in android/app/src/main/kotlin/dev/duynp/flutter_health_connect_example/MainActivity.kt
-  static const String _checkIfShouldShowPrivacyPolicyFunction = 'checkIfShouldShowPrivacyPolicy';
-  static const MethodChannel platform = MethodChannel(_checkIfShouldShowPrivacyPolicyChannel);
+  static const String _checkIfShouldShowPrivacyPolicyFunction =
+      'checkIfShouldShowPrivacyPolicy';
+  static const MethodChannel platform =
+      MethodChannel(_checkIfShouldShowPrivacyPolicyChannel);
 
-  static const String _privacyPolicy = 'You asked to see our privacy policy.\n\n'
+  static const String _privacyPolicy =
+      'You asked to see our privacy policy.\n\n'
       'I would show it to you, but we both know these are always written in such a way that only lawyers can both read and understand them fully (at the cost of their sanity).\n\n'
       'Just accept it, and pray we somewhat have your best interest at heart.';
 
@@ -58,7 +62,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<bool> _checkIfShouldShowPrivacyPolicy() async =>
-      await platform.invokeMethod(_checkIfShouldShowPrivacyPolicyFunction) as bool;
+      await platform.invokeMethod(_checkIfShouldShowPrivacyPolicyFunction)
+          as bool;
 
   void _updateResultText(String newText) {
     if (context.mounted) {
@@ -68,7 +73,8 @@ class _MyAppState extends State<MyApp> {
 
   void _onCheckIfSupportedButtonTap() async {
     try {
-      final bool checkIfSupported = await HealthConnectFactory.checkIfSupported();
+      final bool checkIfSupported =
+          await HealthConnectFactory.checkIfSupported();
       _updateResultText('checkIfSupported: $checkIfSupported');
     } catch (e, stackTrace) {
       final String errorMessage = '$e,\n$stackTrace';
@@ -79,8 +85,10 @@ class _MyAppState extends State<MyApp> {
 
   void _onCheckIfHealthConnectAppInstalledButtonTap() async {
     try {
-      final bool checkIfHealthConnectAppInstalled = await HealthConnectFactory.checkIfHealthConnectAppInstalled();
-      _updateResultText('checkIfHealthConnectAppInstalled: $checkIfHealthConnectAppInstalled');
+      final bool checkIfHealthConnectAppInstalled =
+          await HealthConnectFactory.checkIfHealthConnectAppInstalled();
+      _updateResultText(
+          'checkIfHealthConnectAppInstalled: $checkIfHealthConnectAppInstalled');
     } catch (e, stackTrace) {
       final String errorMessage = '$e,\n$stackTrace';
       debugPrint(errorMessage);
@@ -138,11 +146,13 @@ class _MyAppState extends State<MyApp> {
   void _onGetChangesButtonTap() async {
     try {
       if (_token.isEmpty) {
-        _updateResultText('Changes: Before getting the changes you need to generate the changes token.');
+        _updateResultText(
+            'Changes: Before getting the changes you need to generate the changes token.');
         return;
       }
 
-      final Map<String, dynamic> changes = await HealthConnectFactory.getChanges(_token);
+      final Map<String, dynamic> changes =
+          await HealthConnectFactory.getChanges(_token);
       _updateResultText('Changes: $changes');
     } catch (e, stackTrace) {
       final String errorMessage = '$e,\n$stackTrace';
@@ -163,7 +173,8 @@ class _MyAppState extends State<MyApp> {
       /// from here when the user taps the "privacy policy" button in Google Health's permission dialog.
       /// If it is instead set to "standard" or "singleTop" then the code under will NOT be called, and initState
       /// will be called instead.
-      final bool shouldShowPrivacyPolicy = await _checkIfShouldShowPrivacyPolicy();
+      final bool shouldShowPrivacyPolicy =
+          await _checkIfShouldShowPrivacyPolicy();
       if (shouldShowPrivacyPolicy) {
         _updateResultText(_privacyPolicy);
       } else {
@@ -178,7 +189,8 @@ class _MyAppState extends State<MyApp> {
 
   void _onGetRecordsButtonTap() async {
     try {
-      final DateTime startTime = DateTime.now().subtract(const Duration(days: 4));
+      final DateTime startTime =
+          DateTime.now().subtract(const Duration(days: 4));
       final DateTime endTime = DateTime.now();
       final List<Future<dynamic>> requests = [];
       final Map<String, dynamic> typePoints = {};
@@ -204,7 +216,8 @@ class _MyAppState extends State<MyApp> {
 
   void _onSendRecordsButtonTap() async {
     try {
-      final DateTime startTime = DateTime.now().subtract(const Duration(seconds: 5));
+      final DateTime startTime =
+          DateTime.now().subtract(const Duration(seconds: 5));
       final DateTime endTime = DateTime.now();
 
       final StepsRecord stepsRecord = StepsRecord(
@@ -252,7 +265,8 @@ class _MyAppState extends State<MyApp> {
 
   void _onGetAggregatedDataButtonTap() async {
     try {
-      final DateTime startTime = DateTime.now().subtract(const Duration(days: 1));
+      final DateTime startTime =
+          DateTime.now().subtract(const Duration(days: 1));
       final DateTime endTime = DateTime.now();
       final Map<String, double> result = await HealthConnectFactory.aggregate(
         aggregationKeys: [
@@ -273,7 +287,8 @@ class _MyAppState extends State<MyApp> {
   void _onDeleteRecordByIdButtonTap() async {
     try {
       const HealthConnectDataType type = HealthConnectDataType.Steps;
-      final DateTime startTime = DateTime.now().subtract(const Duration(days: 1));
+      final DateTime startTime =
+          DateTime.now().subtract(const Duration(days: 1));
       final DateTime endTime = DateTime.now();
 
       final StepsRecord stepsRecord = StepsRecord(
@@ -305,7 +320,8 @@ class _MyAppState extends State<MyApp> {
   void _onDeleteRecordByTimesButtonTap() async {
     try {
       const HealthConnectDataType type = HealthConnectDataType.Steps;
-      final DateTime startTime = DateTime.now().subtract(const Duration(days: 1));
+      final DateTime startTime =
+          DateTime.now().subtract(const Duration(days: 1));
       final DateTime endTime = DateTime.now();
 
       final StepsRecord stepsRecord = StepsRecord(
@@ -368,7 +384,8 @@ class _MyAppState extends State<MyApp> {
               ),
               ElevatedButton(
                 onPressed: () => _onCheckIfHealthConnectAppInstalledButtonTap(),
-                child: const Text('Check if Google Health Connect app is installed'),
+                child: const Text(
+                    'Check if Google Health Connect app is installed'),
               ),
               ElevatedButton(
                 onPressed: () => _onInstallHealthConnectButtonTap(),
