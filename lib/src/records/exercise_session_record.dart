@@ -128,10 +128,14 @@ class ExerciseSessionRecord extends IntervalRecord {
       exerciseType: ExerciseType.fromValue(map['exerciseType']),
       title: map['title'],
       notes: map['notes'],
-      segments: List<ExerciseSegment>.from(
-          map['segments']?.map((x) => ExerciseSegment.fromMap(x))),
-      laps: List<ExerciseLap>.from(
-          map['laps']?.map((x) => ExerciseLap.fromMap(x))),
+      segments: map['segments'] != null
+          ? List<ExerciseSegment>.from(map['segments'].map(
+              (x) => ExerciseSegment.fromMap(Map<String, dynamic>.from(x))))
+          : [],
+      laps: map['laps'] != null
+          ? List<ExerciseLap>.from(map['laps']
+              .map((x) => ExerciseLap.fromMap(Map<String, dynamic>.from(x))))
+          : [],
       route: map['route'] != null
           ? ExerciseRoute.fromMap(Map<String, dynamic>.from(map['route']))
           : null,
