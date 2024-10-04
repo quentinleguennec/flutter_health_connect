@@ -1,5 +1,4 @@
 package dev.duynp.flutter_health_connect
-import android.util.Log;
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
