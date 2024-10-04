@@ -1,5 +1,5 @@
 package dev.duynp.flutter_health_connect
-
+import android.util.Log;
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -581,12 +581,22 @@ class FlutterHealthConnectPlugin(private var channel: MethodChannel? = null) : F
                             metrics.toSet(), timeRangeFilter = TimeRangeFilter.between(start, end)
                         )
                     )
-
                     val resultData = aggregationKeys.associateBy({ it }, {
-                        replyMapper.convertValue(
-                            response[HealthConnectAggregateMetricTypeMap[it]!!],
-                            Double::class.java
-                        )
+                        if(it=="TotalCaloriesBurnedRecordEnergyTotal"){
+                            val data= response[HealthConnectAggregateMetricTypeMap[it]!!]  
+                            replyMapper.convertValue(
+                                data.toString(),
+                                String::class.java
+                            )
+                        }
+                        else{
+                            val data= response[HealthConnectAggregateMetricTypeMap[it]!!]
+                            replyMapper.convertValue(
+                                data,
+                                Double::class.java
+                            )
+                        }
+                       
                     })
                     result.success(resultData)
                 }
